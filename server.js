@@ -158,7 +158,7 @@ app.put('/api/appliances/:id', upload.fields([
 
     const appliance = await Appliance.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
