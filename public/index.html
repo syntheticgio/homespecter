@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeSpecter - Home Appliance Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side Menu -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>🏠 HomeSpecter</h1>
+            </div>
+            <nav class="menu">
+                <ul>
+                    <li><a href="#" class="menu-item active" data-view="appliances">
+                        <span class="icon">📱</span>
+                        <span>Appliances</span>
+                    </a></li>
+                    <li><a href="#" class="menu-item" data-view="add">
+                        <span class="icon">➕</span>
+                        <span>Add Appliance</span>
+                    </a></li>
+                    <li><a href="#" class="menu-item" data-view="settings">
+                        <span class="icon">⚙️</span>
+                        <span>Settings</span>
+                    </a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Appliances View (Default) -->
+            <div id="appliances-view" class="view active">
+                <div class="view-header">
+                    <h2>My Appliances</h2>
+                    <button class="btn btn-primary" onclick="showView('add')">+ Add New</button>
+                </div>
+                <div id="appliances-grid" class="appliances-grid">
+                    <div class="loading">Loading appliances...</div>
+                </div>
+            </div>
+
+            <!-- Add Appliance View -->
+            <div id="add-view" class="view">
+                <div class="view-header">
+                    <h2>Add New Appliance</h2>
+                    <button class="btn btn-secondary" onclick="showView('appliances')">← Back</button>
+                </div>
+                <form id="appliance-form" class="appliance-form" enctype="multipart/form-data">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Appliance Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select category...</option>
+                                <option value="Kitchen">Kitchen</option>
+                                <option value="Laundry">Laundry</option>
+                                <option value="Climate Control">Climate Control</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Cleaning">Cleaning</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="manufacturer">Manufacturer</label>
+                            <input type="text" id="manufacturer" name="manufacturer">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="model">Model Number</label>
+                            <input type="text" id="model" name="model">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="serialNumber">Serial Number</label>
+                            <input type="text" id="serialNumber" name="serialNumber">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" placeholder="e.g., Kitchen, Basement">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purchaseDate">Purchase Date</label>
+                            <input type="date" id="purchaseDate" name="purchaseDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="warrantyExpiry">Warranty Expiry</label>
+                            <input type="date" id="warrantyExpiry" name="warrantyExpiry">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purchasePrice">Purchase Price ($)</label>
+                            <input type="number" id="purchasePrice" name="purchasePrice" step="0.01" min="0">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="notes">Notes</label>
+                            <textarea id="notes" name="notes" rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="photos">Photos (Optional)</label>
+                            <input type="file" id="photos" name="photos" accept="image/*" multiple>
+                            <small>You can select multiple photos</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="manuals">Manuals/Documents (Optional)</label>
+                            <input type="file" id="manuals" name="manuals" accept=".pdf,.doc,.docx,.txt" multiple>
+                            <small>Upload user manuals, warranties, receipts, etc.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Appliance</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settings-view" class="view">
+                <div class="view-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-section">
+                        <h3>Application Settings</h3>
+                        <div class="settings-group">
+                            <label>
+                                <input type="checkbox" id="darkMode" onchange="toggleDarkMode()">
+                                Enable Dark Mode
+                            </label>
+                        </div>
+                        <div class="settings-group">
+                            <label>
+                                Default View:
+                                <select id="defaultView">
+                                    <option value="grid">Grid View</option>
+                                    <option value="list">List View</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>About</h3>
+                        <p>HomeSpecter v1.0.0</p>
+                        <p>Manage your home appliances with ease.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for viewing appliance details -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
