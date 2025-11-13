@@ -9,6 +9,7 @@ A comprehensive home appliance management web application that helps you track, 
 - 📄 **Document Storage**: Store manuals, warranties, and receipts
 - 🏠 **Organized Display**: View all appliances in an intuitive tile-based layout
 - 🔍 **Detailed View**: Click on any appliance to see complete details
+- 🌗 **Dark Mode**: Toggle light/dark themes (auto-detects system preference, persists per browser)
 - ⚙️ **Settings**: Customize your experience with settings page
 - 🎨 **Responsive Design**: Works on desktop, tablet, and mobile devices
 
@@ -101,9 +102,12 @@ If you prefer to run without Docker:
 - **Delete**: Click the "Delete" button on the tile
 - **Edit**: Edit functionality available (button present on each tile)
 
-### Settings
+### Settings & Dark Mode
 
 Access the Settings page from the sidebar to:
+- Toggle **Dark Mode** (immediately updates UI)
+- Dark mode is remembered using `localStorage` per browser
+- If you haven't chosen a theme yet, the app follows your OS preference
 - Configure display preferences
 - View application information
 
