@@ -4,6 +4,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,11 +19,19 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => console.error('MongoDB connection error:', err));
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
+app.use('/api/', limiter);
 
 // Ensure uploads directory exists
 if (!fs.existsSync('uploads')) {
@@ -125,24 +134,25 @@ app.put('/api/appliances/:id', upload.fields([
   { name: 'manuals', maxCount: 5 }
 ]), async (req, res) => {
   try {
-    const updateData = {
-      name: req.body.name,
-      category: req.body.category,
-      manufacturer: req.body.manufacturer,
-      model: req.body.model,
-      serialNumber: req.body.serialNumber,
-      purchaseDate: req.body.purchaseDate,
-      warrantyExpiry: req.body.warrantyExpiry,
-      purchasePrice: req.body.purchasePrice,
-      location: req.body.location,
-      notes: req.body.notes,
-      updatedAt: Date.now()
-    };
+    // Build update data with explicit field mapping to prevent injection
+    const updateData = {};
+    
+    // Only allow specific fields to be updated
+    const allowedFields = ['name', 'category', 'manufacturer', 'model', 'serialNumber', 
+                           'purchaseDate', 'warrantyExpiry', 'purchasePrice', 'location', 'notes'];
+    
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+    
+    updateData.updatedAt = Date.now();
 
-    if (req.files.photos) {
+    if (req.files && req.files.photos) {
       updateData.photos = req.files.photos.map(f => f.filename);
     }
-    if (req.files.manuals) {
+    if (req.files && req.files.manuals) {
       updateData.manuals = req.files.manuals.map(f => f.filename);
     }
 
