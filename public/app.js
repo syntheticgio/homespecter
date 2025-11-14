@@ -215,6 +215,28 @@ function setupAppEventListeners() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
+
+    // Autocomplete setup
+    setupManufacturerAutocomplete('manufacturer', 'model');
+    setupManufacturerAutocomplete('edit-manufacturer', 'edit-model', false);
+
+    // Location autocomplete (add & edit forms)
+    const locationInput = document.getElementById('location');
+    if (locationInput) {
+        setupAutocomplete(locationInput, async () => {
+            const response = await apiFetch(`${API_URL}/api/locations`);
+            if (!response.ok) return [];
+            return await response.json();
+        });
+    }
+    const editLocationInput = document.getElementById('edit-location');
+    if (editLocationInput) {
+        setupAutocomplete(editLocationInput, async () => {
+            const response = await apiFetch(`${API_URL}/api/locations`);
+            if (!response.ok) return [];
+            return await response.json();
+        });
+    }
 }
 
 // View management
@@ -230,7 +252,137 @@ function showView(viewName) {
             item.classList.add('active');
         }
     });
+
+    if (viewName === 'add') {
+        // Reset and setup form when switching to 'add' view
+        resetForm();
+    }
 }
+
+/**
+ * Sets up autocomplete functionality for a given input field.
+ * @param {HTMLInputElement} inputEl The input element to attach autocomplete to.
+ * @param {Function} fetcher A function that takes a query string and returns a promise resolving to an array of suggestions.
+ */
+function setupAutocomplete(inputEl, fetcher) {
+    let suggestionsContainer = inputEl.parentElement.querySelector('.autocomplete-suggestions');
+    if (!suggestionsContainer) {
+        suggestionsContainer = document.createElement('div');
+        suggestionsContainer.className = 'autocomplete-suggestions';
+        inputEl.parentElement.appendChild(suggestionsContainer);
+    }
+
+    let activeSuggestion = -1;
+
+    const renderSuggestions = (suggestions) => {
+        suggestionsContainer.innerHTML = '';
+        if (suggestions.length === 0) {
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+
+        suggestions.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            div.textContent = item;
+            div.addEventListener('click', () => {
+                inputEl.value = item;
+                suggestionsContainer.innerHTML = '';
+                suggestionsContainer.style.display = 'none';
+                // Trigger change event for dependent fields
+                inputEl.dispatchEvent(new Event('change'));
+            });
+            suggestionsContainer.appendChild(div);
+        });
+        suggestionsContainer.style.display = 'block';
+        activeSuggestion = -1;
+    };
+
+    inputEl.addEventListener('input', async () => {
+        const query = inputEl.value;
+        if (query.length < 1) {
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+        try {
+            const suggestions = await fetcher(query);
+            renderSuggestions(suggestions.filter(s => s.toLowerCase().includes(query.toLowerCase())));
+        } catch (error) {
+            console.error('Autocomplete fetch error:', error);
+        }
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+        const items = suggestionsContainer.querySelectorAll('.autocomplete-item');
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            activeSuggestion++;
+            if (activeSuggestion >= items.length) activeSuggestion = 0;
+            updateActiveSuggestion(items);
+        } else if (e.key === 'ArrowUp') {
+            activeSuggestion--;
+            if (activeSuggestion < 0) activeSuggestion = items.length - 1;
+            updateActiveSuggestion(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeSuggestion > -1) {
+                items[activeSuggestion].click();
+            }
+        } else if (e.key === 'Escape') {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    const updateActiveSuggestion = (items) => {
+        items.forEach(item => item.classList.remove('active'));
+        if (items[activeSuggestion]) {
+            items[activeSuggestion].classList.add('active');
+        }
+    };
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== inputEl) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+}
+
+function setupManufacturerAutocomplete(manufacturerId, modelId, disableModel = true) {
+    const manufacturerInput = document.getElementById(manufacturerId);
+    const modelInput = document.getElementById(modelId);
+
+    if (disableModel) {
+        modelInput.disabled = true;
+    }
+
+    // Setup for Manufacturer
+    setupAutocomplete(manufacturerInput, async () => {
+        const response = await apiFetch(`${API_URL}/api/manufacturers`);
+        if (!response.ok) return [];
+        return await response.json();
+    });
+
+    manufacturerInput.addEventListener('change', () => {
+        const manufacturer = manufacturerInput.value;
+        if (manufacturer) {
+            modelInput.disabled = false;
+            modelInput.value = '';
+            // Setup for Model, based on manufacturer
+            setupAutocomplete(modelInput, async () => {
+                const response = await apiFetch(`${API_URL}/api/models?manufacturer=${encodeURIComponent(manufacturer)}`);
+                if (!response.ok) return [];
+                return await response.json();
+            });
+        } else {
+            if (disableModel) {
+                modelInput.disabled = true;
+            }
+            modelInput.value = '';
+        }
+    });
+}
+
 
 // Load appliances
 async function loadAppliances() {
@@ -327,7 +479,17 @@ async function handleFormSubmit(e) {
 
 // Reset form
 function resetForm() {
-    document.getElementById('appliance-form').reset();
+    const form = document.getElementById('appliance-form');
+    form.reset();
+    
+    // Also disable the model field again
+    const modelInput = document.getElementById('model');
+    if (modelInput) {
+        modelInput.disabled = true;
+    }
+    // Clear any existing autocomplete suggestions
+    const suggestions = form.querySelectorAll('.autocomplete-suggestions');
+    suggestions.forEach(s => s.innerHTML = '');
 }
 
 // Show appliance details in modal
@@ -456,6 +618,10 @@ async function editAppliance(id) {
         
         // Store the appliance ID for submission
         document.getElementById('edit-appliance-form').dataset.id = id;
+
+        // Trigger change on manufacturer to enable model field if needed
+        const manufacturerInput = document.getElementById('edit-manufacturer');
+        manufacturerInput.dispatchEvent(new Event('change'));
         
         // Show edit modal and close detail modal
         closeModal();

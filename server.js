@@ -239,6 +239,22 @@ app.get('/api/models', isAuthenticated, async (req, res) => {
   }
 });
 
+// Get distinct locations for the logged-in user
+app.get('/api/locations', isAuthenticated, async (req, res) => {
+  try {
+    let locations = await Appliance.distinct('location', { user: req.user.id });
+    // Normalize: trim, remove empties/nulls, dedupe again after trim, sort
+    locations = Array.from(new Set(locations
+      .filter(l => l !== null && l !== undefined)
+      .map(l => (typeof l === 'string' ? l.trim() : l))
+      .filter(l => l && l.length > 0))
+    ).sort((a, b) => a.localeCompare(b));
+    res.json(locations);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 // Create appliance
 // (Same file fetching logic as before)

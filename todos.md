@@ -15,22 +15,12 @@
 - **Phase 1 (Frontend):** Implement a JavaScript event listener on the image input area to handle the `paste` event. Extract the image data from the clipboard.
 - **Phase 2 (Frontend/Backend):** Convert the pasted image data into a `File` object or a data URL and append it to the form data to be uploaded to the server. Ensure the backend can handle this format.
 
-### 2. Autocomplete for Manufacturer and Model
-- **Description:** Provide autocomplete suggestions for the "Manufacturer" and "Model" fields to ensure consistency and speed up data entry.
-- **Phase 1 (Backend):** [x] Create new API endpoints (e.g., `/api/manufacturers` and `/api/models?manufacturer=...`) that return a distinct list of existing manufacturers and models from the database.
-- **Phase 2 (Frontend):** Implement autocomplete functionality on the "Manufacturer" input field, fetching data from the new endpoint.
-- **Phase 3 (Frontend):** Once a manufacturer is selected, enable and implement autocomplete on the "Model" input field, fetching models filtered by the selected manufacturer.
-
 ### 4. Fetch Current Price from Amazon
 - **Description:** Add a "Current Price" field next to "Purchase Price". When a manufacturer and model are entered, attempt to fetch the current price from a source like Amazon.
 - **Phase 1 (Backend):** Create a new API endpoint (e.g., `/api/price-lookup?manufacturer=...&model=...`) that scrapes or uses an API (like Amazon's Product Advertising API) to find the product's current price. This will require significant research into scraping techniques or API integration.
 - **Phase 2 (Frontend):** Add a "Current Price" display field (read-only) and a "Fetch Price" button next to it. When the button is clicked, call the new backend endpoint and display the result.
 - **Note:** This is a complex feature that may be unreliable due to challenges with web scraping and API access.
 
-### 5. Autocomplete for Location
-- **Description:** Similar to the manufacturer field, the "Location" field should provide autocomplete suggestions based on locations already entered for other appliances.
-- **Phase 1 (Backend):** Create a new API endpoint (e.g., `/api/locations`) that returns a distinct list of locations from the database.
-- **Phase 2 (Frontend):** Implement autocomplete on the "Location" input field, fetching data from the new endpoint.
 
 ### 6. AI-Generated Product Summary
 - **Description:** Add a "Summary" section to the appliance details. After a model number and manufacturer are entered, fetch a summary of the product.
