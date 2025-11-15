@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="12" fill="url(#g)" />
+
+  <!-- Simple house icon -->
+  <path d="M32 15 L14 30 H19 V47 H45 V30 H50 L32 15 Z" fill="#ffffff" opacity="0.95" />
+  <!-- Door -->
+  <rect x="28" y="36" width="8" height="11" rx="1" fill="#667eea" />
+  <!-- Window (left) -->
+  <rect x="20" y="34" width="6" height="6" rx="0.75" fill="#ffffff" opacity="0.9" />
+  <!-- Window (right) -->
+  <rect x="38" y="34" width="6" height="6" rx="0.75" fill="#ffffff" opacity="0.9" />
+  <!-- Roof accent -->
+  <path d="M32 18 L46 30 H18 L32 18 Z" fill="#ffffff" opacity="0.08" />
+</svg>
